@@ -40,7 +40,7 @@ fn insert_ffi(dict: erlang.Reference, rows: List(#(key, val))) -> Bool
 pub fn get(
   from dict: ConcurrentDict(key, val),
   key key: key,
-) -> Result(record, Nil) {
+) -> Result(val, Nil) {
   ffi_lookup_set(dict.reference, key)
 }
 
