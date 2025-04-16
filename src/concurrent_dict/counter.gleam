@@ -32,3 +32,10 @@ pub fn value(of counter: ConcurrentCounter) -> Int {
 
 @external(erlang, "counters", "get")
 fn value_ffi(counter: erlang.Reference, index: Int) -> Int
+
+pub fn reset(counter: ConcurrentCounter) -> Nil {
+  reset_ffi(counter.reference, 1, 0)
+}
+
+@external(erlang, "counters", "put")
+fn reset_ffi(counter: erlang.Reference, index: Int, value: Int) -> Nil
