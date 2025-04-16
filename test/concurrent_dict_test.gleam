@@ -25,3 +25,21 @@ pub fn insert_get_test() {
   concurrent_dict.to_list(tab)
   |> should.equal([#(1, "world")])
 }
+
+pub fn delete_all_test() {
+  let tab = concurrent_dict.new()
+
+  concurrent_dict.insert(tab, 1, "hello")
+  concurrent_dict.insert(tab, 2, "world")
+
+  concurrent_dict.get(tab, 1)
+  |> should.equal(Ok("hello"))
+
+  concurrent_dict.delete_all(tab)
+
+  concurrent_dict.get(tab, 1)
+  |> should.equal(Error(Nil))
+
+  concurrent_dict.get(tab, 2)
+  |> should.equal(Error(Nil))
+}

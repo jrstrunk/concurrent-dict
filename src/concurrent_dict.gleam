@@ -8,14 +8,35 @@ pub opaque type ConcurrentDict(key, val) {
   ConcurrentDict(reference: erlang.Reference, name: atom.Atom)
 }
 
+/// Creates a new, unique concurrent dictionary. Under the hood, this creates
+/// a new ETS table with a unique name.
 pub fn new() -> ConcurrentDict(key, val) {
   let name =
-    { "cd" <> instant.now() |> instant.to_unique_int |> int.to_string }
+    { "concurrentdict" <> instant.now() |> instant.to_unique_int |> int.to_string }
     |> atom.create_from_string
 
   create_ffi(name)
   |> ConcurrentDict(name)
 }
+
+/// Deletes all values in the dictionary.
+pub fn delete_all(dict: ConcurrentDict(key, val)) -> Nil {
+  delete_all_ffi(dict.reference)
+  Nil
+}
+
+@external(erlang, "ets", "delete_all_objects")
+fn delete_all_ffi(reference: erlang.Reference) -> Nil
+
+/// Drops a concurrent dictionary, removing it from memory and invalidating all
+/// references to it. Operations on a dropped dictionary will crash.
+pub fn drop(dict: ConcurrentDict(key, val)) -> Nil {
+  drop_ffi(dict.reference)
+  Nil
+}
+
+@external(erlang, "ets", "delete")
+fn drop_ffi(reference: erlang.Reference) -> Nil
 
 pub fn from_list(list: List(#(key, val))) -> ConcurrentDict(key, val) {
   let cd = new()
