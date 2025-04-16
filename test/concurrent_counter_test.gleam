@@ -1,4 +1,4 @@
-import concurrent_counter
+import concurrent_dict/counter as concurrent_counter
 import gleeunit
 import gleeunit/should
 
