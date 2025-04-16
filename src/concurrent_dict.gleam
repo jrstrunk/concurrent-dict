@@ -12,7 +12,10 @@ pub opaque type ConcurrentDict(key, val) {
 /// a new ETS table with a unique name.
 pub fn new() -> ConcurrentDict(key, val) {
   let name =
-    { "concurrentdict" <> instant.now() |> instant.to_unique_int |> int.to_string }
+    {
+      "concurrentdict"
+      <> instant.now() |> instant.to_unique_int |> int.to_string
+    }
     |> atom.create_from_string
 
   create_ffi(name)
