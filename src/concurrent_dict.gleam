@@ -1,10 +1,10 @@
-import gleam/result
 import gleam/erlang
 import gleam/erlang/atom
 import gleam/erlang/process
 import gleam/int
 import gleam/list
 import gleam/otp/actor
+import gleam/result
 import tempo/instant
 
 pub opaque type ConcurrentDict(key, val) {
@@ -77,15 +77,26 @@ pub fn from_list(list: List(#(key, val))) -> ConcurrentDict(key, val) {
 @external(erlang, "concurrent_dict_ffi", "create_table")
 fn create_ffi(name: atom.Atom) -> erlang.Reference
 
+/// Inserts a key-value pair into the dictionary, then updates all subscribers.
+/// If you need to insert multiple key-value pairs, use `insert_many` function
+/// to only update the subscribers once after all insertions are complete.
 pub fn insert(dict: ConcurrentDict(key, val), key: key, val: val) -> Nil {
   let assert True = insert_ffi(dict.ets_table, [#(key, val)])
+  update_subscribers(dict)
+}
 
+/// Inserts multiple key-value pairs into the dictionary, then updates all
+/// subscribers.
+pub fn insert_many(dict: ConcurrentDict(key, val), rows: List(#(key, val))) {
+  list.each(rows, fn(row) { insert(dict, row.0, row.1) })
+  update_subscribers(dict)
+}
+
+fn update_subscribers(dict: ConcurrentDict(key, val)) {
   case dict.subscriber_actor {
     Ok(subscriber_actor) -> process.send(subscriber_actor, UpdateSubscribers)
     Error(..) -> Nil
   }
-
-  Nil
 }
 
 @external(erlang, "ets", "insert")
